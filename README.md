@@ -1,2 +1,2 @@
-# ShellcodeObfuscation
+# Chromatophore
 Utilities for obfuscating shellcode
