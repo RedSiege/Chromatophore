@@ -8,7 +8,7 @@ import random
 import string
 
 
-# Based on snovvcrash RC4 encryption script: cathttps://gist.github.com/snovvcrash/3533d950be2d96cf52131e8393794d99
+# Based on snovvcrash RC4 encryption script: https://gist.github.com/snovvcrash/3533d950be2d96cf52131e8393794d99
 # Stolen from: https://gist.github.com/hsauers5/491f9dde975f1eaa97103427eda50071
 def key_scheduling(key):
     key = [ord(char) for char in key]
