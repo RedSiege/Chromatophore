@@ -164,3 +164,4 @@ XOR/xor-multibyte-key.c
 AES/aes.c
 NoObfuscation/noobfuscation.c
 NoObfuscation/noobfuscation-loader.c
+B64String/b64string.cs
