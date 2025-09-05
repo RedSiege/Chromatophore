@@ -177,3 +177,5 @@ ReverseBytesXOR/reverse_byte_order_xor.c
 ReverseHexString/reverse_hex_string.c
 TwoArray/twoarray.c
 UUID/uuid.c
+GIFLoader/payload.gif
+GIFLoader/gifloader.cs
