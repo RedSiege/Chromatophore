@@ -47,7 +47,7 @@ def main():
     original_shellcode = original_shellcode.rstrip(', ')
     print("Original shellcode:")
     print(original_shellcode)
-    
+
 
 if __name__ == '__main__':
         main()
