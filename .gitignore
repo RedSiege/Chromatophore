@@ -159,3 +159,5 @@ cython_debug/
 
 # Generated C files
 Caesar/caesar.c
+XOR/xor.c
+XOR/xor-multibyte-key.c
