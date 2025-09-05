@@ -69,19 +69,16 @@ def main():
     xorkey = randrange(0, 255)
     #xorkey = bytes(xorkey, "UTF8")
 
-    '''
-        Read and format shellcode
-    '''
     shellcode = get_raw_sc(input_file)
-
     xor_shellcode = XOR(shellcode, xorkey).hex()
-
     build_template(format_shellcode(xor_shellcode), len(shellcode), xorkey)
 
-
-    #print("The original shellcode is:\n")
-    #print(raw_shellcode)
-
+    original_shellcode = ""
+    for byte in shellcode:
+        original_shellcode = original_shellcode + str(hex(byte).zfill(2)) + ", "
+    original_shellcode = original_shellcode.rstrip(', ')
+    print("Original shellcode:")
+    print(original_shellcode)
 
 
 if __name__ == '__main__':
