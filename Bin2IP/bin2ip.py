@@ -34,10 +34,22 @@ def get_ips(ip_input, version):
     return ip_string
 
 
+def get_raw_sc(input_file):
+    input_file = input_file
+    file_shellcode = b''
+    try:
+        with open(input_file, 'rb') as shellcode_file:
+            file_shellcode = shellcode_file.read()
+            file_shellcode = file_shellcode.strip()
+        return(file_shellcode)
+    except FileNotFoundError:
+        exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=str,
-                        help="File containing raw shellcode. Defaults to beacon.bin.")
+                        help="File containing raw shellcode. Defaults to calc.bin.")
     parser.add_argument("-v", "--version", type=str, help="IPv(4) or IPv(6).")
     
     if len(sys.argv) == 1:
@@ -49,7 +61,7 @@ def main():
     if args.input:
         input_file = args.input
     else:
-        input_file = "beacon.bin"
+        input_file = "calc.bin"
 
     if not args.version:
         args.version = "4"
@@ -91,6 +103,14 @@ def main():
     # Write out the loader source code
     with open(sourcecode_name, 'w') as output_file:
         output_file.write(template)
+
+    raw_shellcode = get_raw_sc(input_file)
+    original_shellcode = ""
+    for byte in raw_shellcode:
+        original_shellcode = original_shellcode + str(hex(byte).zfill(2)) + ", "
+    original_shellcode = original_shellcode.rstrip(', ')
+    print("Original shellcode:")
+    print(original_shellcode)
 
 
 if __name__ == '__main__':

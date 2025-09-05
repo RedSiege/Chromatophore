@@ -165,3 +165,5 @@ AES/aes.c
 NoObfuscation/noobfuscation.c
 NoObfuscation/noobfuscation-loader.c
 B64String/b64string.cs
+Bin2IP/bin2ipv4.c
+Bin2IP/bin2ipv6.c
