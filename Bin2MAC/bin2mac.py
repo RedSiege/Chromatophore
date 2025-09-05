@@ -84,6 +84,14 @@ def main():
     with open('bin2mac.c', 'w') as output_file:
         output_file.write(template)
 
+    raw_shellcode = get_raw_sc(input_file)
+    original_shellcode = ""
+    for byte in raw_shellcode:
+        original_shellcode = original_shellcode + str(hex(byte).zfill(2)) + ", "
+    original_shellcode = original_shellcode.rstrip(', ')
+    print("Original shellcode:")
+    print(original_shellcode)
+
 
 if __name__ == '__main__':
     main()
