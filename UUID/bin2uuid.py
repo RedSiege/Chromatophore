@@ -4,6 +4,19 @@ import argparse
 import sys
 from uuid import UUID
 
+
+def get_raw_sc(input_file):
+    input_file = input_file
+    file_shellcode = b''
+    try:
+        with open(input_file, 'rb') as shellcode_file:
+            file_shellcode = shellcode_file.read()
+            file_shellcode = file_shellcode.strip()
+        return(file_shellcode)
+    except FileNotFoundError:
+        exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
+
+
 def insert_uuid(uuid):
     with open('main.c.template') as template_file:
         template = template_file.read()
@@ -32,11 +45,19 @@ def bin_to_uuid(bin_file):
         exit("\nThe shellcode file you specified does not exist! Exiting...\n")
 
 
+def build_template(uuids):
+    with open("uuid_template.c") as tplate:
+        template = tplate.read()
+        template = template.replace("###UUIDS###", uuids)
+
+    with open("uuid.c", "w") as outfile:
+        outfile.write(template)
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=str,
-                        help="File containing raw shellcode. Defaults to beacon.bin.")
+                        help="File containing raw shellcode.")
     
     if len(sys.argv) == 1:
         # No arguments received.  Print help and exit
@@ -48,9 +69,15 @@ def main():
     # Parse our raw shellcode and format it to UUIDs
     uuids = bin_to_uuid(args.input)
 
+    build_template(uuids)
 
-    # print out UUIDs
-    print(uuids)
+    shellcode = get_raw_sc(args.input)
+    original_shellcode = ""
+    for byte in shellcode:
+        original_shellcode = original_shellcode + str(hex(byte).zfill(2)) + ", "
+    original_shellcode = original_shellcode.rstrip(', ')
+    print("Original shellcode:")
+    print(original_shellcode)
 
 
 if __name__ == '__main__':

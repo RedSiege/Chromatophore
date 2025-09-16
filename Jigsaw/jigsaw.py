@@ -1,5 +1,6 @@
 import random
 import sys
+import argparse
 
 
 def getShellcode(input_file):
@@ -24,8 +25,17 @@ def getShellcode(input_file):
         sys.exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
 
 
-def generateJigsaw(filename):
-    shellcode = getShellcode(filename)
+def build_template(jigsaw, positions, shellcode_length):
+    with open("jigsaw_template.c") as tplate:
+        template = tplate.read()
+        template = template.replace("###SHELLCODE_LENGTH###", str(shellcode_length))
+        template = template.replace("###JIGSAW###", jigsaw)
+        template = template.replace("###POSITIONS###", positions)
+
+    with open("jigsaw.c", "w") as outfile:
+        outfile.write(template)
+
+def generateJigsaw(shellcode):
     sc_len = len(shellcode)
     raw_positions = list(range(0,sc_len))
     random.shuffle(raw_positions)
@@ -34,50 +44,41 @@ def generateJigsaw(filename):
     for position in raw_positions:
         jigsaw.append(shellcode[position])
 
-    jigsaw_array = 'unsigned char jigsaw[XXX] = { '
+    jigsaw_array = ''
     jigsaw_array += ', '.join(str(byte) for byte in jigsaw)
-    jigsaw_array += ' };'
 
-    position_array = 'int positions[XXX] = { '
+    position_array = ''
     position_array += ', '.join(str(x) for x in raw_positions)
-    position_array += ' };'
 
-    code = jigsaw_array + '\n\n'
-    code += position_array + '\n\n'
-    code += '''
-int calc_len = XXX;
-unsigned char calc_payload[XXX] = { 0x00 };
-int position;
+    return jigsaw_array, position_array
 
-// Reconstruct the payload
-for (int idx = 0; idx < sizeof(positions) / sizeof(positions[0]); idx++) {
-	position = positions[idx];
-	calc_payload[position] = jigsaw[idx];
-}
-'''
-    code = code.replace('XXX', str(sc_len))
 
-    with open('jigsaw.txt', 'w') as outfile:
-        outfile.write(code)
+def main():
+    ### Parse our arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", type=str,
+                        help="File containing raw shellcode.")
 
+    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        # No arguments received.  Print help and exit
+        parser.print_help(sys.stderr)
+        sys.exit(0)
+
+    if args.input:
+        input_file = args.input
+    else:
+        input_file = "calc.bin"
+
+    shellcode = getShellcode(input_file)
+    jigsaw, positions = generateJigsaw(shellcode)
+
+    build_template(jigsaw, positions, len(shellcode))
+
+    print("Original shellcode:")
+    print(*(x for x in shellcode))
 
 if __name__ == "__main__":
-
-        '''
-        Purpose: This script takes one argument: the filename of your shellcode in .bin format. 
-                         The script reads the binary file in and then generates a C template 
-                         in the current directory containing the randomized shellcode, the lookup table, and the decoder.
-        Input: 
-                filename of your shellcode (.bin formatted files only)
-
-        Output: 
-                jigsaw.txt
-        '''
-
-        if not len(sys.argv) == 2:
-                print("[x] Script requires one argument, the filename of your shellcode .bin file.")
-                sys.exit()
-        generateJigsaw(sys.argv[1])
-        
+    main()
 
 

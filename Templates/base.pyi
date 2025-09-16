@@ -21,31 +21,6 @@ def get_shellcode(input_file):
         exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
 
 
-def caesar(sc_list):
-    sc = []
-    for x in sc_list:
-        if (int(x) + 13) > 255:
-            sc.append("0x" + hex(x + 13 - 256)[2:].zfill(2))
-        else:
-            sc.append("0x" + hex(x + 13)[2:].zfill(2))
-    return sc
-
-
-def build_template(caesar):
-    caesar_arr = ""
-    for x in caesar:
-        caesar_arr = caesar_arr + x + ', '
-    caesar_arr = caesar_arr.strip(", ")
-    caesar_length = len(caesar)
-    with open("caesar_template.c") as tplate:
-        template = tplate.read()
-        template = template.replace("###SC_LENGTH###", str(caesar_length))
-        template = template.replace("###CAESAR###", caesar_arr)
-
-    with open("caesar.c", "w") as outfile:
-        outfile.write(template)
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=str,
@@ -63,19 +38,13 @@ def main():
         input_file = "calc.bin"
 
     '''
-        Read shellcode file
+        Read and format shellcode
     '''
-    shellcode,raw_shellcode = get_shellcode(input_file)
-
-    # Perform Caesar cipher
-    caesar_sc = caesar(shellcode)
-
-    # Build the C template
-    build_template(caesar_sc)
-
-    # Print out the original shellcode for verification
+    shellcode = get_shellcode(input_file)
+    sc_len = len(shellcode.split(','))
     print("The original shellcode is:\n")
     print(raw_shellcode)
+
 
 
 if __name__ == '__main__':

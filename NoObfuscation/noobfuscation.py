@@ -15,34 +15,25 @@ def get_shellcode(input_file):
             raw_shellcode = "0" + ",0".join(binary_code.split("\\")[1:])
 
 
-        return (file_shellcode, raw_shellcode)
+        return file_shellcode, raw_shellcode
 
     except FileNotFoundError:
         exit("\n\nThe input file you specified does not exist! Please specify a valid file path.\nExiting...\n")
 
 
-def caesar(sc_list):
-    sc = []
-    for x in sc_list:
-        if (int(x) + 13) > 255:
-            sc.append("0x" + hex(x + 13 - 256)[2:].zfill(2))
-        else:
-            sc.append("0x" + hex(x + 13)[2:].zfill(2))
-    return sc
-
-
-def build_template(caesar):
-    caesar_arr = ""
-    for x in caesar:
-        caesar_arr = caesar_arr + x + ', '
-    caesar_arr = caesar_arr.strip(", ")
-    caesar_length = len(caesar)
-    with open("caesar_template.c") as tplate:
+def build_template(shellcode):
+    with open("noobfuscation_template.c") as tplate:
         template = tplate.read()
-        template = template.replace("###SC_LENGTH###", str(caesar_length))
-        template = template.replace("###CAESAR###", caesar_arr)
+        template = template.replace("###SHELLCODE###", shellcode)
 
-    with open("caesar.c", "w") as outfile:
+    with open("noobfuscation.c", "w") as outfile:
+        outfile.write(template)
+
+    with open("noobfuscation_loader_template.c") as tplate:
+        template = tplate.read()
+        template = template.replace("###SHELLCODE###", shellcode)
+
+    with open("noobfuscation-loader.c", "w") as outfile:
         outfile.write(template)
 
 
@@ -62,20 +53,13 @@ def main():
     else:
         input_file = "calc.bin"
 
-    '''
-        Read shellcode file
-    '''
     shellcode,raw_shellcode = get_shellcode(input_file)
 
-    # Perform Caesar cipher
-    caesar_sc = caesar(shellcode)
+    build_template(raw_shellcode)
 
-    # Build the C template
-    build_template(caesar_sc)
-
-    # Print out the original shellcode for verification
-    print("The original shellcode is:\n")
+    print("The original shellcode is:")
     print(raw_shellcode)
+
 
 
 if __name__ == '__main__':
