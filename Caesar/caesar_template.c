@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 // compile:
-//  cl.exe /nologo /W0 /Tcfilename.c /link /out:output.exe /SUBSYSTEM:CONSOLE /MACHINE:x64
+//  cl.exe /nologo /W0 /Tccaesar.c /link /out:caesar.exe /SUBSYSTEM:CONSOLE /MACHINE:x64
 
 int main(void)
 {
