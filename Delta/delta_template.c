@@ -3,7 +3,7 @@
 #include <windows.h>
 
 // Compile:
-//   cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tcoffset.c /link /out:offset.exe /SUBSYSTEM:CONSOLE /MACHINE:x64
+//   cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tcdelta.c /link /out:delta.exe /SUBSYSTEM:CONSOLE /MACHINE:x64
 
 int main(){
 	
