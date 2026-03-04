@@ -46,7 +46,7 @@ int main(void)
 	AESDecrypt((char *) shellcode, sizeof(shellcode), AESkey, sizeof(AESkey));
 
 	printf("AES-encrypted shellcode will including padding on the end");
-	printf("if the size of the shellcode does not align on a 16-byte boundary.\n"	
+	printf("if the size of the shellcode does not align on a 16-byte boundary.\n");
 	int idx = 0;
 	while ( idx < sizeof(shellcode))
 	{
