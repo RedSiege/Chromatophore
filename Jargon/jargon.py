@@ -11,9 +11,8 @@ def gen_word_combinations(dict_file):
         exit("\n\nThe dictionary you specified does not exist! Please specify a valid file path.\nExiting...\n")
 
     # Select random words from dictionary
-    # why is this 257?  It fails at 256
     try:
-        random_words = random.sample(words, 257)
+        random_words = random.sample(words, 256)
         return random_words
     except ValueError:
         exit("\n\nThe dictionary file you specified does not contain at least 256 words!\nExiting...\n")
@@ -78,7 +77,7 @@ def main():
     words = gen_word_combinations(dict_file)
     english_array = []
     for i in range(0, 256):
-        english_array.append(words.pop(1).strip())
+        english_array.append(words.pop(0).strip())
 
     '''
         Read and format shellcode
